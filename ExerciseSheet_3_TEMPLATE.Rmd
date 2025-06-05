@@ -91,7 +91,20 @@ For small datasets like these adding them to git is not a problem.
 a)  Load the `pixar_films` dataset into R. Clean the dataset by removing
     films without a title. Inspect the variable `film_rating`. What are
     the possible values and what do they mean? Create a factor variable
-    for the film rating. Why is this appropriate?
+    for the film rating. Why is this appropriate? 
+```{r} 
+library(tidyverse)
+pixar_films<-read_csv("pixar_films.csv") 
+pixar_films_clean<-pixar_films %>% 
+  filter(!is.na(film)) 
+pixar_films_clean$film_rating_factor <- factor(pixar_films_clean$film_rating, levels = c("G", "PG", "N/A"))
+
+```
+    The possible values for film rating are: 
+    G- it means: General audiences – All ages admitted
+    PG- it means: Parental guidance suggested – Some material may not be suitable for children  
+    N/A- the value is here missing for these films
+Factors help R understand the values not like just strings, but as categories. This allpows for an easier use in summaries or if we want to plot it. 
 
 <!-- -->
 
