@@ -102,9 +102,12 @@ pixar_films_clean$film_rating_factor <- factor(pixar_films_clean$film_rating, le
 ```
     The possible values for film rating are: 
     G- it means: General audiences – All ages admitted
-    PG- it means: Parental guidance suggested – Some material may not be suitable for children  
+    PG- it means: Parental guidance suggested – Some material may not be 
+    suitable for children  
     N/A- the value is here missing for these films
-Factors help R understand the values not like just strings, but as categories. This allpows for an easier use in summaries or if we want to plot it. 
+    Factors help R understand the values not like just strings, 
+    but as categories. This allpows for an easier use in summaries or if 
+    we want to plot it. 
 
 <!-- -->
 
@@ -113,7 +116,31 @@ b)  Inspect the film titles manually. Which films form a film series? A
     films, often in conjunction with a number in the title,
     e.g. "Despicable Me" and "Despicable Me 2". Create a dataframe which
     displays a list of the different series with the titles of the films
-    and how many films belong to the series. Output the dataframe.
+    and how many films belong to the series. Output the dataframe. 
+    
+```{r} 
+pixar_series<-pixar_films_clean %>% 
+  mutate(series = case_when(
+    grepl("Toy Story", film) ~ "Toy Story",
+    grepl("Cars", film) ~ "Cars",
+    grepl("Finding", film) ~ "Finding",
+    grepl("Incredibles", film) ~ "Incredibles", 
+    grepl("Monsters", film) ~ "Monsters",
+    TRUE ~ NA_character_
+  )) 
+
+pixar_series <- pixar_series %>%
+  filter(!is.na(series)) %>%                  
+  group_by(series) %>%
+  summarise(
+    titles = paste(film, 
+                   collapse = ", " 
+                   ),      
+    num_films = n(),                            
+    .groups = "drop"
+  )
+
+```
 
 c)  Load the `public_response` dataframe into R. Convert the
     `cinema_score` variable into a factor while ensuring the factor
