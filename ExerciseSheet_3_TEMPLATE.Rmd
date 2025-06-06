@@ -53,7 +53,8 @@ d)  Name 2 strengths and 2 weaknesses of git. (Don't forget to create a
 2 Weaknesses: 
     Not good for storing data as it struggles with large files 
     It can be complicated to use it at first 
-    
+(The commit for this is called "Third commit") 
+
 e)  Knit this exercise sheet. Some new files will automatically be
     generated when knitting the sheet e.g. the HTML page. Ignore these
     files, as we only want to track the source files themselves. You
@@ -97,14 +98,15 @@ library(tidyverse)
 pixar_films<-read_csv("pixar_films.csv") 
 pixar_films_clean<-pixar_films %>% 
   filter(!is.na(film)) 
-pixar_films_clean$film_rating_factor <- factor(pixar_films_clean$film_rating, levels = c("G", "PG", "N/A"))
+pixar_films_clean$film_rating_factor <- factor(pixar_films_clean$film_rating, 
+                                               levels = c("G", "PG", "N/A"))
 
 ```
     The possible values for film rating are: 
     G- it means: General audiences – All ages admitted
     PG- it means: Parental guidance suggested – Some material may not be 
     suitable for children  
-    N/A- the value is here missing for these films
+    N/A- the film has not been rated
     Factors help R understand the values not like just strings, 
     but as categories. This allpows for an easier use in summaries or if 
     we want to plot it. 
@@ -140,8 +142,6 @@ pixar_series_grouped <- pixar_series %>%
     .groups = "drop"
   ) 
 pixar_series_grouped 
-
-
 ```
 
 c)  Load the `public_response` dataframe into R. Convert the
@@ -152,10 +152,13 @@ c)  Load the `public_response` dataframe into R. Convert the
     
 ```{r}
 public_response<-read_csv("public_response.csv") 
-public_response$cinema_score <- factor(public_response$cinema_score, levels = c("A-", "A", "A+"),
-  ordered = TRUE) 
-pixar_combined <- left_join(pixar_films_clean, public_response, by = "film")
+public_response$cinema_score <- factor(public_response$cinema_score, 
+                                       levels = c("A-", "A", "A+"), 
+                                       ordered = TRUE) 
 
+pixar_combined <- left_join(pixar_films_clean, 
+                            public_response, 
+                            by = "film")
 ```
     
 
@@ -175,13 +178,17 @@ d)  Choose one of the variables representing the public response and
     series? Do you see any patterns? 
     
 ```{r} 
-pixar_plot <- left_join(pixar_series, public_response, by = "film") 
+pixar_plot <- left_join(pixar_series, 
+                        public_response, 
+                        by = "film") 
 
 pixar_plot<- pixar_plot %>% 
   filter(!is.na(series))%>%
-  arrange(series, release_date) %>%
+  arrange(series, 
+          release_date) %>%
   group_by(series) %>%
-  mutate(film = factor(film, levels = unique(film))) %>%
+  mutate(film = factor(film, 
+                       levels = unique(film))) %>%
   ungroup()
  
 ggplot(pixar_plot, aes(x = series, 
@@ -192,14 +199,17 @@ ggplot(pixar_plot, aes(x = series,
            position = position_dodge(width = 0.9), width = 0.8, 
            ) +  
   labs(
-    title = "Audience Scores of Pixar Films by Series",
+    title = "Rotten tomatoes score on Pixar series",
     x = "Film Series",
-    y = "Audience Score",
+    y = "Score",
     fill = "Film Title"
   ) 
    
 ```
-    
+
+From what I can see on the graph, the first film is usually the highest rated 
+one. The ones after it, have a slightly lower score(apart fom cars, whose 
+second movie is much less liked thsn the first one).          
 
 ## Exercise 4: Open Analysis (4 points)
 
@@ -213,17 +223,47 @@ a)  Go to <https://github.com/owid/owid-datasets/tree/master/datasets>
 b)  Download the dataset and track it in git.
 c)  Put the name / title of the dataset and a link to it below.
 
--   Dataset Name: ...
--   Link: <https://github.com/owid/owid-datasets/>...
+-   Dataset Name: GDP growth from previous year, 2020 Q2 (Eurostat, OECD, National sources)
+-   Link: https://github.com/owid/owid-datasets/blob/master/datasets/GDP%20growth%20from%20previous%20year%2C%202020%20Q2%20(Eurostat%2C%20OECD%2C%20National%20sources)/GDP%20growth%20from%20previous%20year%2C%202020%20Q2%20(Eurostat%2C%20OECD%2C%20National%20sources).csv 
 
 d)  Come up with a (research) question you want to answer with the data
     and briefly explain why you believe this is an interesting question
     within one sentence. It should be a question that can be answered
-    with the dataset and using R.
+    with the dataset and using R. 
+    The question I want to answer is: How has the working environment changed 
+    over the years? 
+    Our dataset spans from 1953 to 2017, allowing us to examine how workplace 
+    preferences have shifted over the decades. I am particularly interested in 
+    how attitudes toward having a female boss have changed during this period. 
+    What trends can be observed in people's preferences regarding  
+    female leadership over time?
+    
 e)  Use R to answer your chosen question. Please limit your analysis to
     the functions and techniques we have covered so far in the course.
     You are **not expected** to use advanced statistical models or
-    external packages which haven't been introduced.
+    external packages which haven't been introduced. 
+```{r}
+gender_preference<-read_csv("Gender preference for boss - Gallup (2017).csv") 
+gender_preference<-janitor::clean_names(gender_preference) 
+
+gender_preference<-gender_preference %>% 
+  arrange(year) %>% 
+    mutate( 
+      diff_male = share_of_people_who_prefer_male_boss_gallup_2017 
+      -lag(share_of_people_who_prefer_male_boss_gallup_2017), 
+diff_female = share_of_people_who_prefer_female_boss_gallup_2017
+      -lag(share_of_people_who_prefer_female_boss_gallup_2017)
+)
+
+head(gender_preference, 
+     n=10)
+
+
+```
+We can see that generally rhe share of people that prefer a male boss 
+has gone down over the years. There are some years such as 1994 or 2000 in which the percentage has increased, but we dont have any context behind the data as to explain why this happened. On the other hand, the oercentage of people who prefer a female boss has increased. In 1953 the percentage of preferred woman leadership was only 2%, while the latest data shows that this percentage now lays at 21%.      
+     
+    
 f)  Create a meaningful plot / figure with the dataset. Make sure to
     provide a figure caption (via the chunk options / Rmarkdown) and
     correctly label the figure.
